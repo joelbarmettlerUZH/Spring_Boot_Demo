@@ -1,4 +1,4 @@
-# Quick introductoin to Spring Boot
+# Quick introduction to Spring Boot
 This Guide walks you through the process of how to build a RESTful API using the Spring Boot Framework.
 
 ## Spring Initializr
