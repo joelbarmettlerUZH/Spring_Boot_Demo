@@ -726,8 +726,6 @@ After starting our application, we can directly post new Users that belong to on
 License
 ----
 
-IMPORTANT: The file "ffmpeg.exe" is excluded from the MIT license and fall under the GNU2 License. Download the original [here](https://www.ffmpeg.org/)
-
 MIT License
 
 Copyright (c) 2018 Joel Barmettler
