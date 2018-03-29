@@ -108,28 +108,28 @@ public class DemoApplication {
 }
 ```
 
-This tiny class is a fully operational web application. The **@SpringBootApplication** annotation tells Spring Boot to set up the default configuration for Spring Projects, Starts the applicatoin context including the whole RESTapi, Services or Repositories, starts the Tomcat server and finally performs a recursive path scan which finds all Spring Annotations (@Something) and injects methods into these classes, making them pure Java again. This **@Something** Annotation will be used heavily in String Boot, since Spring is an annotation-based Framework. Adding such an annotation tells Spring that this Class has a well-defined purpose, and spring will automatically extend our annotated class with important features matching our goals. The main method does nothing more than call SpringApplication to run our current Class. This code is already executable: When pressing "Run" in your IDE or right-clicking the build.gradle-File with hitting "Run", a webserver on the default Port :8080. When you visit [localhost](http://localhost:8080/) in your browser, you will see an error page since we have not defined what should happen when we visit the page */* - but not a message that the page is not found because indeed a server connection was found - it just does not yet return anything back to you.
+This tiny class is a fully operational web application. The **@SpringBootApplication** annotation tells Spring Boot to set up the default configuration for Spring Projects, Starts the applicatoin context including the whole RESTapi, Services or Repositories, starts the Tomcat server and finally performs a recursive path scan which finds all Spring Annotations (@Something) and injects methods into these classes, making them pure Java again. This **@Something** Annotation will be used heavily in Spring Boot, since Spring is an annotation-based Framework. Adding such an annotation tells Spring that this Class has a well-defined purpose, and spring will automatically extend our annotated class with important features matching our goals. The main method does nothing more than call SpringApplication to run our current Class. This code is already executable: When pressing "Run" in your IDE or right-clicking the build.gradle-File with hitting "Run". When you visit [localhost](http://localhost:8080/) in your browser, you will see an error page since we have not defined what should happen when we visit the page */* - but not a message that the page is not found because indeed a server connection was found - it just does not yet return anything back to you.
 
-We need such an annotated main-method because we are getting a single JAR file in the end that should be independently executable on every system that runs a JVM. To make this possible, we include a main method into our applicatoin that runs SpringApplicaton, which will then start our Webserver Container, initialize all services, hosts the Web-Services and so on. We then push our main Class into that server container in order to make it run inside the server. Which is exactly what we do with this single line of code:
+We need such an annotated main-method because we are getting a single JAR file in the end that should be independently executable on every system that runs a JVM. To make this possible, we include a main method into our application that runs SpringApplication, which will then start our Webserver Container, initialize all services, hosts the Web-Services and so on. We then push our main Class into that server container in order to make it run inside the server. Which is exactly what we do with this single line of code:
 
 ```java
 SpringApplication.run(DemoApplication.class, args);
 ```
 
-Now let's have a look at our imports. **org.springframework.boot.autoconfigure.SpringBootApplication** let's us use the **@SpringBootApplication** annotation, while **org.springframework.boot.SpringApplication** includes the **SpringApplication**-Class on which we call the method **run**. We could have passed some arguments to the class we invoke (DemoApplication.class), which would then be retreived by the *String[] args*-Argument of the main method.
+Now let's have a look at our imports. **org.springframework.boot.autoconfigure.SpringBootApplication** let's us use the **@SpringBootApplication** annotation, while **org.springframework.boot.SpringApplication** includes the **SpringApplication**-Class on which we call the method **run**. We could have passed some arguments to the class we invoke (DemoApplication.class), which would then be retrieved by the *String[] args*-Argument of the main method.
 
 ## REST Controller
-A controller is a simple Java-Class annotated with **@RestController**. A Controller receives a request and calls a Method (Service) to handle it. The Requets can be of 4 different types:
-- *GET*: The Person that sends the request to the server wants to **receive** information from it
+A controller is a simple Java-Class annotated with **@RestController**. A Controller receives a request and calls a Method (Service) to handle it. The requests can be of 4 different types:
+- *GET*: The person that sends the request to the server wants to **receive** information from it
 - *POST*: The sender wants to **create** a new object in the backend.
 - *PUT*: The sender would like to **modify** an existing resource.
 - *DELETE*: The sender wants to delete an object
 
-The Request-Types define the context, the intention of the request. In theory, you could create a GET-Request that deletes Objects, or create a PUT-Requests that modifies absolutely nothing and just returns data. These types serve more as "intention specifiers" and so that we can map multiple different request types to the same context / URL.
+The Request-Types define the context, the intention of the request. In theory, you could create a GET-Request that deletes objects, or create a PUT-Requests that modifies absolutely nothing and just returns data. These types serve more as "intention specifiers" and so that we can map multiple different request types to the same context / URL.
 
-Every request is sent to a specific URL. Behind each URL, a REST Controller is located. One such controller handles either a *GET/POST/PUT/DELETE* Request. The REST-Controller receives one of these request types from the browser, together with an optional JSON containing information about the request. The Controller then invokes some Methods to handle the request and finally responds to the Request with a JSON and **STATUS CODES** that indicate whether the request was successfull/failed/invalid. The Controller itself is only responsible for taking the request - calling the right function - sending a JSON back. He is not responsible for computing anything.
+Every request is sent to a specific URL. Behind each URL, a REST Controller is located. One such controller handles either a *GET/POST/PUT/DELETE* request. The REST-Controller receives one of these request types from the browser, together with an optional JSON containing information about the request. The Controller then invokes some methods to handle the request and finally responds to the request with a JSON and **STATUS CODES** that indicate whether the request was successful/failed/invalid. The Controller itself is only responsible for taking the request - calling the right function - sending a JSON back. He is not responsible for computing anything.
 
-To create a new Rest-Contorller, we need to define a **@RestController**, the URL where it should response to, and the request-type it should handle. First, we create a new Java package called **Controllers** and a new Java-Class inside of it that is named *functionality*Controller, like ExampleController. One Controller should always handle at most a small set of URLs and be responsible for one certain type of requests. Like when we want to controll User-data via the RESTapi, we create a UserController that allows managing, creating, deleting and modifying users in the backend. Accordingly, the URL will be like http://www.YourDomain.com/api/v1/user, to which the frontend can send GET/POST/PUT/DELTE requests, the UserController receives and handles them.
+To create a new Rest-Controller, we need to define a **@RestController**, the URL where it should response to, and the request-type it should handle. First, we create a new Java package called **Controllers** and a new Java-Class inside of it that is named *functionality*Controller, like ExampleController. One Controller should always handle at most a small set of URLs and be responsible for one certain type of requests. Like when we want to control User-data via the RESTapi, we create a UserController that allows managing, creating, deleting and modifying users in the backend. Accordingly, the URL will be like http://www.YourDomain.com/api/v1/user, to which the frontend can send GET/POST/PUT/DELTE requests, the UserController receives and handles them.
 
 When the Java-Class is created, we create the new Controller as follows:
 
@@ -144,7 +144,7 @@ public class ExampleController{
 }
 ```
 
-Spring Boot knows that this Class is a RestController and we have set our context to the url */api/v1/example*. Each method we add to this class will now handle one specific requesttype to one specific URL. Let's add such a request handler:
+Spring Boot knows that this class is a RestController and we have set our context to the url */api/v1/example*. Each method we add to this class will now handle one specific request-type to one specific URL. Let's add such a request handler:
 
 ```java
 package com.example.demo.Controllers;
@@ -190,14 +190,14 @@ public class ExampleController {
 }
 ```
 
-There are several things going on here. First, we have specified two arguments for our greeting method: Two Strings, name and number. The first String is required but has a default value on "Unknown". The second String is not required. Then, our REST-Controller looks whether the user has specified a number of not and forms it response accordingly.
+There are several things going on here. First, we have specified two arguments for our greeting method: Two Strings, name and number. The first String is required but has a default value on "Unknown". The second String is not required. Then, our REST-Controller looks whether the user has specified a number or not and forms its response accordingly.
 
 But how can the user specify the values for name and number? Well, he simply adds it to the API-Call URL like this:
 **http://localhost:8080/api/v1/example?name=joel&number=4**. This results in the following response from our API:
 
 > Example content for joel with number 7
 
-But we are not quiet done yet. We talked about HTTP Status codes that indicate whether the request was successfull. We also would like our URL's to be more flexible, so let's add these two features.
+But we are not quite done yet. We talked about HTTP Status codes that indicate whether the request was successful of not. We also would like our URL's to be more flexible, so let's add these two features.
 
 ```java
 package com.example.demo.Controllers;
@@ -225,15 +225,15 @@ public class ExampleController {
 }
 ```
 
-We did two things here. First, we modified the URL that handles the request. Instead of ""/api/v1/example", we now serve **"/api/v1/example/{id}"**. Note that the *id* is a variable and not a fixed value. We can now retreive this variable in the greeting method with the **@PathVariable** notation as a String or - in our case - a Long. This id variable can then be used in the context. Further, we added a **@ResponseStatus(HttpStatus.OK)** to the Controller, which gives an OK-Status code back to the frontend when the method is called. Other possible HttpStatus codes would be *ACCEPT*, *CONFLICT*, *CREATED* and many more. To send a request to this Controller, we now need to specify the ID in the URL-Path as follows: **http://localhost:8080/api/v1/example/3?name=joel&number=4**. Note that I chose the ID to be 3 here, just as an example.
+We did two things here. First, we modified the URL that handles the request. Instead of ""/api/v1/example", we now serve **"/api/v1/example/{id}"**. Note that the *id* is a variable and not a fixed value. We can now retrieve this variable in the greeting method with the **@PathVariable** notation as a String or - in our case - a Long. This id variable can then be used in the context. Further, we added a **@ResponseStatus(HttpStatus.OK)** to the Controller, which gives an OK-Status code back to the frontend when the method is called. Other possible HttpStatus codes would be *ACCEPT*, *CONFLICT*, *CREATED* and many more. To send a request to this Controller, we now need to specify the ID in the URL-Path as follows: **http://localhost:8080/api/v1/example/3?name=joel&number=4**. Note that I chose the ID to be 3 here, just as an example.
 
-But why would you need such a parameter inside of the URL-Path when you could equally provide is as a RequestParam? Well, it turns out that the URL defines more "what content you want to access", while the RequestParam is more "additional information to that request". Let me give you an example. When you have a UserAPI at "/Users/" and you want to get access to the user with a particular ID, you use a PathVariable: "/Users/{UserID}/". When you now want to specify what information you would like to get from the information, like "get me the last 5 books the user with ID = 1 has read", we use RequestParam: "/Users/1?NumberOfBooks=5" RequestParameters are often optional and let you filter/specify the information you want to get from the api.
+But why would you need such a parameter inside of the URL-Path when you could equally provide is as a RequestParam? Well, it turns out that the URL defines more "what content you want to access", while the RequestParam is more "additional information to that request". Let me give you an example. When you have a UserAPI at "/Users/" and you want to get access to the user with a particular ID, you use a PathVariable: "/Users/{UserID}/". When you now want to specify what information you would like to get from the information, like "get me the last 5 books the user with ID = 1 has read", we use RequestParam: "/Users/1?NumberOfBooks=5" RequestParameters are often optional and let you filter/specify the information you want to get from the Api.
 
 # Resources
 
 The resource Package in our application will hold all classes that we have in our system that are not directly involved into the REST-Communication. Such a class can be a User, a Game, or anything else.
 
-For now, we have just passed arround primitive data types, but spring Boot is much more powerfull than that. Let's build a REST-Controller that returns Objects of type "User". First, we create a simple User-Java Class in a new Package called "Resource" and insert the User class into it.
+For now, we have just passed around primitive data types, but Spring Boot is much more powerful than that. Let's build a REST-Controller that returns objects of type "User". First, we create a simple User-Java class in a new package called "Resource" and insert the User class into it.
 
 ```java
 package com.example.demo.Resources;
@@ -260,7 +260,7 @@ public class User {
 
 ```
 
-We have successfully created a very simple Resource on which our RESTapi can rely. Note that we have two constructors: One that receives arguments (name) and one that does NOT. Your resources always have to have an empty constructors and Setters for all values that you want to set, because spring boot is going to parse JSON files into Objects later on by calling the empty constructors and setting all values via Setters (that's why we also need setters for every instance variable we want to set).
+We have successfully created a very simple Resource on which our RESTapi can rely. Note that we have two constructors: One that receives arguments (name) and one that does NOT. Your resources always have to have an empty constructors and setters for all values that you want to set, because Spring Boot is going to parse JSON files into Objects later on by calling the empty constructors and setting all values via setters (that's why we also need setters for every instance variable we want to set).
 
 # Services
 
@@ -293,7 +293,7 @@ public class UserService {
 
 We created a new Service that has a List of three Users and a public method *getUsers* which returns these Users. A RESTService is annotated via **@Service**.
 
-Now we need create a new REST-Controller UserController that reacts to "/Users/" and calls the Service to return three users on GET-Requests.
+Now we need to create a new REST-Controller UserController that reacts to "/Users/" and calls the Service to return three users on GET-Requests.
 
 ```java
 package com.example.demo.Controllers;
@@ -321,15 +321,15 @@ public class UserController {
 }
 ```
 
-There is a few things going on here that need explenation. We created a new UserController at the context "/api/v1/User" as we did before. But now we want to use a REST-Service, so we have to create an instance of our UserService class. But we actually have not created such an instance, instead we told Spring to create one for us using the **@Autowired** annotation. Why haven't we just created an instance like *private userService = new UserService*? Well, because that would create a new instance of UserController every single time we needed that controller in one of our classes - which is definitely NOT what we want. We want to have one single instance of our userService, and we want this instance to be shared among all Controllers in our API. Why is that so important? Well, our Service is quiet simple. We have three users as instance variables. Let's imagine we create a Controller which let's the user add new users. Simple, right? If now every Controller had its own copy of the Service Instance, only the one controller modifying the Users-List would have new, updated user list. All the other services would still have their own User-List containing three users. But how would we make a shared instance between multiple classes? We don't - spring does. By annotating our Service as a *Service*, and calling spring to *Autowire* the userService, spring first checks whether there already IS an instance somewhere and injects this one, otherwises creates a new instance for us.
+There is a few things going on here that need explanation. We created a new UserController at the context "/api/v1/User" as we did before. But now we want to use a REST-Service, so we have to create an instance of our UserService class. But we actually have not created such an instance, instead we told Spring to create one for us using the **@Autowired** annotation. Why haven't we just created an instance like *private userService = new UserService*? Well, because that would create a new instance of UserController every single time we needed that controller in one of our classes - which is definitely NOT what we want. We want to have one single instance of our UserService, and we want this instance to be shared among all Controllers in our API. Why is that so important? Well, our Service is quiet simple. We have three users as instance variables. Let's imagine we create a Controller which let's the user add new users. Simple, right? If now every Controller had its own copy of the Service Instance, only the one controller modifying the Users-List would have the new, updated user list. All the other services would still have their own User-List containing three users. But how would we make a shared instance between multiple classes? We don't - Spring does. By annotating our Service as a *Service*, and calling Spring to *Autowire* the userService, Spring first checks whether there already IS an instance somewhere and injects this one, otherwise creates a new instance for us.
 
 Now in our GetMapping controller, we can simply call the userService.getUsers() to receive the list of users from the UserService.
 
-When you now visit **http://localhost:8080/api/v1/User**, you get a nicely formated JSON as a response containing all attributes of our User instances.
+When you now visit **http://localhost:8080/api/v1/User**, you get a nicely formatted JSON as a response containing all attributes of our User instances.
 
 > [{"name":"Joel","id":1},{"name":"Marius","id":2},{"name":"Daniela","id":3}]
 
-The last thing we want to have a look at is how to use the other Request-Types like POST/PUT/DELETE. As already mentioned, the type itself does not really matter since it is just a way of expressing the callers intention. But when we use POST or PUT, the caller wants to create or modify an object. Therefore, he needs a way of telling us how this object should look like. Of course, he could in theory pass all these arguments as @RequestParameters, but this would be highly unpractical with larger objects. Instead, he shall be able to provide a JSON-Representation of an actual object that he wants to create. Our Controller shall then parse this JSON into a real object and then call a Service with this object.
+Next up we want to have a look at is how to use the other Request-Types like POST/PUT/DELETE. As already mentioned, the type itself does not really matter since it is just a way of expressing the callers intention. But when we use POST or PUT, the caller wants to create or modify an object. Therefore, he needs a way of telling us how this object should look like. Of course, he could in theory pass all these arguments as @RequestParameters, but this would be highly unpractical with larger objects. Instead, he shall be able to provide a JSON-Representation of an actual object that he wants to create. Our Controller shall then parse this JSON into a real object and then call a Service with this object.
 
 First, let's add a new Method called *addUser* to our UserService, which receives a User as an argument and adds it to the List of users.
 
@@ -351,11 +351,11 @@ public void createUser(@RequestBody User user){
 }
 ```
 
-Looks like black magic. We have created a new method accepting POST-Requests on the Context, which is "/api/v1/User". The requests needs to have a **@RequestBody** that is a JSON representation of a User. This user is then passed to the UserService to add it to the list of users. How is that supposed to work? Well, in order to create a new User, we need to have a representation of its attributes in the form of a JSON file. Spring will then take that json file and parse it into an object. In our design, a User is defined by two attributes: an ID and a Name. Now have a look at the empty constructor we defined. It set's the ID for us, but it does not set the Name. Spring is going to call exactly this constructor and then call all Setters that correspond to the values we pass in the JSON file. So spring creates a new User which then has no "name" attribute. But in the JSON file we provide when calling the POST-Request, we have a line that states
+Looks like black magic. We have created a new method accepting POST-Requests on the Context, which is "/api/v1/User". The requests needs to have a **@RequestBody** that is a JSON representation of a User. This user is then passed to the UserService to add it to the list of users. How is that supposed to work? Well, in order to create a new User, we need to have a representation of its attributes in the form of a JSON file. Spring will then take that JSON file and parse it into an object. In our design, a User is defined by two attributes: an ID and a name. Now have a look at the empty constructor we defined. It set's the ID for us, but it does not set the Name. Spring is going to call exactly this constructor and then call all setters that correspond to the values we pass in the JSON file. So Spring creates a new User which then has no "name" attribute. But in the JSON file we provide when calling the POST-Request, we have a line that states
 
 > "name":"SOMENAME"
 
-Spring will recognize that there is a Setter for name, called setName, and will call it with the value "SOMENAME" after the object is created. That way, we get a fully defined user-object.
+Spring will recognize that there is a setter for name, called setName, and will call it with the value "SOMENAME" after the object is created. That way, we get a fully defined user-object.
 
 To test whether our API works, first make a GET-Request to **http://localhost:8080/api/v1/User**. You will get our three users as usual:
 
@@ -371,9 +371,9 @@ This implies that we want to create (POST) a new user with name set to "Reto". C
 
 # Entities
 
-So far, our Spring Boot application only manipulated object instances through services, but we were not connected to a database yet. Remember the package JPA we have added to our dependenceis when creating the project through the initializr? JPA is a java library that lets us ue Object relational Mapping, a way to write classes into databases: Every Class becomes its own table, every Class attribute becomes a table column.
+So far, our Spring Boot application only manipulated object instances through services, but we were not connected to a database yet. Remember the package JPA we have added to our dependencies when creating the project through the initializr? JPA is a java library that lets us use object relational mapping, a way to write classes into databases: Every class becomes its own table, every class attribute becomes a table column.
 
-Every Class that we want to map into our database needs to be annotated as an Entity. Let's create a new Java package called "Entities". There, we create a new Entity called "UserEntity", which will be exactly like our User Resource, but as a database representation. We will modify our Program in a way such that we can delete the User Resource in the end and fully rely on the User Entity.
+Every class that we want to map into our database needs to be annotated as an entity. Let's create a new Java package called "Entities". There, we create a new entity called "UserEntity", which will be exactly like our User resource, but as a database representation. We will modify our program in a way such that we can delete the User resource in the end and fully rely on the User entity.
 
 ```java
 package com.example.demo.Entities;
@@ -398,12 +398,12 @@ public class UserEntity {
 }
 ```
 
-Our code changed quiet a bit. We sill have our fields for ID and name, but we have no constructor and no class variables anymore. Instead, we have marked our class with the **@Entity** annotation, showing Spring Boot that this class should be converted to a database representation. The **@Id** annotation marks the fields which act as a primary key in our database. **@GeneratedValue** means that this Value is not set by the Constructor but an automatically chosen and unique value, like the *Autoincrement* for SQL databases. Finally, **@Column** marks all fields in our class that should become a column. Column can takes additional optoinal attributes like *unique*, which states that no two entries with the same value of this attribute can exist in the table. Note that we do not have any constructors anymore since we will not create instances of this class anymore *(there could be entities which you want to instantiate by hand - there is nothing wrong with that. We just don't need it here in our application, we therefore do not construct a constructor)*, but only create instances through the database with the help of Spring. Therere, we do not need our constructor with arguments, which implies that we can get rid of the empty constructor as well since the empty constructor is implicitely given anyways when no other constructor is defined in the class.
+Our code changed quiet a bit. We sill have our fields for ID and name, but we have no constructor and no class variables anymore. Instead, we have marked our class with the **@Entity** annotation, showing Spring Boot that this class should be converted to a database representation. The **@Id** annotation marks the fields which act as a primary key in our database. **@GeneratedValue** means that this Value is not set by the Constructor but an automatically chosen and unique value, like the *Autoincrement* for SQL databases. Finally, **@Column** marks all fields in our class that should become a column. Column can takes additional optional attributes like *unique*, which states that no two entries with the same value of this attribute can exist in the table. Note that we do not have any constructors anymore since we will not create instances of this class anymore *(there could be entities which you want to instantiate by hand - there is nothing wrong with that. We just don't need it here in our application, we therefore do not construct a constructor)*, but only create instances through the database with the help of Spring. Therefor, we do not need our constructor with arguments, which implies that we can get rid of the empty constructor as well since the empty constructor is given implicitly anyways when no other constructor is defined in the class.
 
-Fine, we got our Database Table now. But how are we going to create new entries, manipulate and delete them, and create queries for our table? We will find out when we talk about repositories.
+Fine, we got our database table now. But how are we going to create new entries, manipulate and delete them, and create queries for our table? We will find out when we talk about repositories.
 
 ## Repositories
-A repository the interface that we use to communicate with a database table. For each Entity, we also have to define a corresponding repository that defines methods which we can use to manipulate our table. Therefore, let's create a new package called "Repositories" and a new interface *(you see why an interface in a minute)* inside of it called "UserRepository".
+A repository is the interface that we use to communicate with a database table. For each entity, we also have to define a corresponding repository that defines methods which we can use to manipulate our table. Therefore, let's create a new package called "Repositories" and a new interface *(you see why an interface in a minute)* inside of it called "UserRepository".
 
 ```java
 package com.example.demo.Repositories;
@@ -418,9 +418,9 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>{
 }
 ```
 
-Looks quiet empty, right. Let's see why. In this interface, we have to define the functions we want to make use of in order to access our table. When you think about it, it becomes clear that most of our Respository-interfaces will implement mostly the same methods: *getByID*, *getAll*, *deleteByID* and so on. Luckily, spring offers a sollution to inherit all such methods from **CrudRepository**. So we simply extend this CrudRepository and provide it with two types: What type of Class our from our DataBase the Repository should manage, and what type the primary key is. Now that we extend CrudRepository, we can use the UserRespository Interface for getting data out of the Table, inserting new data into it and manipulating existing data.
+Looks quiet empty, right. Let's see why. In this interface, we have to define the functions we want to make use of in order to access our table. When you think about it, it becomes clear that most of our Respository-interfaces will implement mostly the same methods: *getByID*, *getAll*, *deleteByID* and so on. Luckily, Spring offers a solution to inherit all such methods from **CrudRepository**. So we simply extend this CrudRepository and provide it with two types: What type of class from our DataBase the Repository should manage, and what type the primary key is. Now that we extend CrudRepository, we can use the UserRespository Interface for getting data out of the table, inserting new data into it and manipulating existing data.
 
-But there are certain limits to CrudRepository: There is no method that let's us find a User by its name, since this is no general query that nearly any Table needs. So we have to create this method by our own, which is why we have the *User findByName(String name)* method there. Even though we are just defining a method in an interface for which we do not provide an implementation, we can actually execute the methods we define here in the interface. Spring analyzes the name of the method and automatically decides what actions surely need to be taken, and finally implements the method for us. So by saying *findByName(String name)*, we implicitly state that the method shall find an enitity by its name given as an argument. This implies that we have to follow a naming scheme for our methods, which is:
+But there are certain limits to CrudRepository: There is no method that let's us find a User by its name, since this is no general query that nearly any table needs. So we have to create this method by our own, which is why we have the *User findByName(String name)* method there. Even though we are just defining a method in an interface for which we do not provide an implementation, we can actually execute the methods we define here in the interface. Spring analyzes the name of the method and automatically decides what actions surely need to be taken, and finally implements the method for us. So by saying *findByName(String name)*, we implicitly state that the method shall find an entity by its name given as an argument. This implies that we have to follow a naming scheme for our methods, which is:
 **findByAttribute(argument)**, where *attribute* needs to be the name of an entity attribute and *argument* is an argument of the same type as the entity attribute.
 
 
@@ -457,7 +457,7 @@ public class UserentityService {
 
 We are again marking this UserentityService as a Service via the **@Service** annotation. Then, we autowire the user repository to the variable called userRepository. Finally, we replaced the content of our methods by calls to the userRepository database.
 
-To return a list of all UserEntities from our database, we call userRepository.findAll(), which returns us an iterable of all entries of our database. Then, we loop over these entires and call the List users to add the elemnet to its list via a lambda expression.
+To return a list of all UserEntities from our database, we call userRepository.findAll(), which returns us an iterable of all entries of our database. Then, we loop over these entries and call the List users to add the element to its list via a lambda expression.
 
 To add a user, we simply pass it to the database using userRepository.save(user).
 
@@ -497,7 +497,7 @@ public class UserentityController {
 ```
 
 I have just replaced all "User" with "UserEntity" and the "UserService" with "UserentityService". Let's try this out. Restart the server and make a GET-request to "/api/v1/Userentity". Of course, it returns nothing since we have no users yet.
-Now, create a new user using postmans POST-method.
+Now, create a new user using postman's POST-method.
 
 >{"name": "Joel"}
 
@@ -507,7 +507,7 @@ Now make the GET-Request again. We successfully added a new entry into our datab
 
 # Entity Relations
 
-For now, our Entities only consisted of primitive datatypes. What if we want to have references to other objects inside of our database - like foreign keys? Let's create a simple new Entity called "University". Each user will have a field with a reference to one specific university where he is currently immatriculated.
+For now, our Entities only consisted of primitive datatypes. What if we want to have references to other objects inside of our database - like foreign keys? Let's create a simple new Entity called "University". Each user will have a field with a reference to one specific university where he is currently matriculated.
 
 ```java
 package com.example.demo.Entities;
@@ -548,7 +548,7 @@ public class UniversityEntity {
 }
 ```
 
-The semesterCosts field is marked as **@JsonIgnore** which implies that this value will be ignored when converting our Object instance to a Json representation - so we won't send this attribute to the user if he requests the object as a Json.
+The semesterCosts field is marked as **@JsonIgnore** which implies that this value will be ignored when converting our Object instance to a JSON representation - so we won't send this attribute to the user if he requests the object as a JSON.
 
 Let's quickly define the University Repository as well.
 
@@ -565,7 +565,7 @@ public interface UniversityRepository extends CrudRepository<UniversityEntity, L
 }
 ```
 
-Now we modify our UserEntity so that he has a field of type University. Don't forget to create new Getters and Setters for the University attribute.
+Now we modify our UserEntity so that he has a field of type University. Don't forget to create new getters and setters for the University attribute.
 
 ```java
 package com.example.demo.Entities;
@@ -595,7 +595,7 @@ Note that we marked the university field as a foreign key of type **@ManyToOne**
 
 ## Repository for accessing Entity Relations
 How would we now define a method in our UserentityRepository what would get us all the users of a certain university? Well, our schema **findByattribute(argument)** would no longer hold since we do not want to provide an instance of *university* of which we want to find the users - but instead want to provide the ID of the university as a long. Well, all we need to do is to extend our method naming scheme a bit:
-**findByEntityAttribute(argument)**. In this manner, a new Repository method to get all students that are immatriculated on an university with a certain ID would look as follows:
+**findByEntityAttribute(argument)**. In this manner, a new Repository method to get all students that are matriculated on an university with a certain ID would look as follows:
 
 ```java
 package com.example.demo.Repositories;
@@ -612,11 +612,11 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>{
 ```
 
 ## Controller dealing with Entity Relations
-When we now want to create a new instance of *User* via POST-Method, we also need to include the university in the Json file. Let's try that out. Make a POST-Request to "api/v1/Userentity" with the following Json:
+When we now want to create a new instance of *User* via POST-Method, we also need to include the university in the JSON file. Let's try that out. Make a POST-Request to "api/v1/Userentity" with the following JSON:
 
 >{"name": "Joel","university":{"name":"UZH","numberOfStudents":20000,"semesterCosts":720}}
 
-This will throw you an error. Why? Because the University we specified does not even exist. We need to create the university first. But we actually don't want to create all our universities using POSt-methods. Nobody shall actually create universities, we want to have a fixed list of universities that can be mapped to users. How would we achieve that? Well, we preload our universities database with data. Let's see how.
+This will throw you an error. Why? Because the University we specified does not even exist. We need to create the university first. But we actually don't want to create all our universities using POST-methods. Nobody shall actually create universities, we want to have a fixed list of universities that can be mapped to users. How would we achieve that? Well, we preload our universities database with data. Let's see how.
 
 # Preloading a database with data
 We have our database which we can manipulate. But until now, we had to manually post all our data to the database after starting the application. In most cases, this is not what we want - we want to have prefilled data in our databases. To achieve this, we define a **CommandLineRunner**-Bean in the main Appliaction:
@@ -653,7 +653,7 @@ public class DemoApplication {
 
 This creates universities for us and saves them into the database. The CommandLineRunner get's executed first before any other custom application runs on our server.
 
-Let's now crate a user via Json POST-Request to "api/v1/Userentity" again:
+Let's now crate a user via JSON POST-Request to "api/v1/Userentity" again:
 
 >{"name": "Joel","university":{"name":"UZH"}}
 
