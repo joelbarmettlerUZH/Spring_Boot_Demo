@@ -461,6 +461,30 @@ To return a list of all UserEntities from our database, we call userRepository.f
 
 To add a user, we simply pass it to the database using userRepository.save(user).
 
+There is another important annotation of Services that we did not use in our example, but is still important to mention: **@Transactional**. The transactinal annotation can be used for whole classes or single methods and implies that - in case of an error while performing the annotated method, everything that was done untill the error occured is reversed automatically. 
+
+```java
+// in UserentityService.java
+@Transactional
+public void addUser(UserEntity user){
+    userRepository.save(user);
+}
+```
+
+The transactional here implies that when you try to add a user to the database, but it fails, the state of the database before the method was called is restored. This is surely not usefull in our example here: When adding a user fails, the database did not change, therefore we do not have to reverse a state. But if we now introduced a new method that added multiple users at once, that would change:
+
+```java
+// in UserentityService.java
+@Transactional
+public void addUsers(List<User> users){
+    for (User user : users){
+        userRepository.save(user)
+    }
+}
+```
+
+If one of the last users in our List of users was an invalid user, the method addUsers would throw an error when reaching that particular user - but all other users would still be stored inside the database. In many cases, this behaviour makes perfectly sense, but there are situations of which we want to revert our database manipulation if we can not do the whole manipulation. If our list of users somehow belonged together and we want to either add all of them or none, we use the **@Transactional** keyword. 
+
 ## Controller using Entities
 Let's create a new controller as well using the new Userentity. It's pretty much copy-paste from the already existing UserController.
 
@@ -658,6 +682,8 @@ When we now want to create a new instance of *User* via POST-Method, we also nee
 
 This will throw you an error. Why? Because the University we specified does not even exist. We need to create the university first. But we actually don't want to create all our universities using POST-methods. Nobody shall actually create universities, we want to have a fixed list of universities that can be mapped to users. How would we achieve that? Well, we preload our universities database with data. Let's see how.
 
+
+
 # Preloading a database with data
 We have our database which we can manipulate. But until now, we had to manually post all our data to the database after starting the application. In most cases, this is not what we want - we want to have prefilled data in our databases. To achieve this, we define a **CommandLineRunner**-Bean in the main Appliaction:
 
@@ -842,6 +868,115 @@ To see the difference go to the UserentityAsyncController and modify the getUser
 You see that we now call the method that takes 5 seconds 3 times.
 If you now run the application again and visit [http://localhost:8080/api/v1/Userentityasync](http://localhost:8080/api/v1/Userentityasync)  
 You will see it still only takes 5 seconds to get the response. Not evidence enought? Well ok then go to the **UserentityService** and comment out the @Async annotation, rerun he Application and visit the previous link again.
+
+# Log REST activities
+To get insight information about what our services, Entities, Respositories and Controllers are doing, it is best to use a logging tool and log all the changes to a file or to the console. Let's add a logger to our UserentityController. Let's try it out. 
+
+First, let's set a constructor for the UserentityController which sets up a Logger:
+
+```java
+[...]
+@RestController
+public class UserentityController {
+    private final String CONTEXT = "/api/v1/Userentity";
+    private final Logger LOGGER = Logger.getLogger(UserentityController.class.getName());
+    private FileHandler filehandler;
+
+    public UserentityController(){
+        try {
+            filehandler = new FileHandler("Serverlog.log", 1024 * 8, 1, true);
+            LOGGER.addHandler(filehandler);
+            SimpleFormatter formatter = new SimpleFormatter();
+            filehandler.setFormatter(formatter);
+            LOGGER.setLevel(Level.FINE);
+            filehandler.setLevel(Level.INFO);
+        }catch(IOException io){
+            System.out.println("ERROR: Could not set logging handler to file");
+        }
+    }
+[...]
+```
+
+We create a new Logger and log to a File called "Serverlog.log" with a max size of 64*1024 bits, so 64kb. When we set the logging level via *LOGGER.setLevel(Level.FINE())*, we define how fine the logging details should be when logging to the **Console**. There are different logging priorities: ALL, INFO, SEVERE, WARNING, FINE, FINER, FINEST. When you chose a certain level of detail, only less detailed messages get displayed. So when chosing "Fine", "Finest" messages are not displayed. We set the level of detail for both, the file and the console. 
+
+Next, we log some events:
+
+```java
+[...]
+@GetMapping(value = CONTEXT)
+@ResponseStatus(HttpStatus.OK)
+public List<UserEntity> getUsers(){
+    LOGGER.info("Returning list of Users");
+    return userentityService.getUsers();
+}
+[...]
+```
+
+Via LOGGER.info(), we define a new message to log with the logging level "Info", so it will be logged into both the file and to the console. When we had chosen the level "Fine", the message would only be logged to the console since the level of the file is too high to disply fine details. Let's send a request to the userentityService and see what happens:
+
+>2018-03-30 20:14:01.484  INFO 17080 --- [nio-8080-exec-1] c.e.d.Controllers.UserentityController   : Returning list of Users
+
+There also appeared a file in the project folder called **Serverlog.log** with the following content: 
+
+>Mar 30, 2018 8:14:01 PM com.example.demo.Controllers.UserentityController getUsers  
+INFO: Returning list of Users
+
+# Excourse: Lambda Expressions
+
+Lambda expressions in java are block of codes that can be threated as values - so assigned to varaibles and passed into functions and methods. Writing a lmabda expression is simple and best illustrated by converting a normal method to a lambda expression:
+
+```java
+// normal method
+public int add(int a, int b){
+    return a + b;
+}
+```
+
+When we now get rid of the public, the method name and the return type, and add a little arrow, we are left with a lambda expression that we can assign to a variable:
+
+```java
+// normal method
+myLambda adder = (a, b) -> { 
+        return a + b; 
+    }
+    
+//New interface class
+@FunctionalInterface
+public interface lambdaAdder{
+    int add(int a, int b);
+}
+```
+
+A lambda expression is always of type *interface*, where we have to define an interface that describes how our lambda expression is going to look like. Here, we have a lambda expression defined that takes two integers and returns an integer, implementing the interface *lambdaAdder* that has the skeleton of a method called *add* which does exactly that. The name of the interface or the name of the method do not matter at all - the only thing that matters is that an interface must always have only one method skeleton - otherwise lambdas can not implement it. Note that we do not have to state the return type or the argument types, since that is implicitly clear when we implement an interface. The interface itself is annotated with **@FunctionalInterface**, which prevents us from writing several method skeletons into it, but still allows other classes to imlement this interface. 
+
+To now call our lambda expression, we call it to *.add()*, which is the name of the method stated in the interface:
+
+```java
+System.out.println(adder.add(3, 4));
+```
+
+Which prints out:
+>7
+
+We can now define methods that take such lambda expressions and perform actions on these. In fact, when we call such methods, we can directly write lambda expressions as arguments:
+
+```java
+public void printAddTo3(lambdaAdder a, int number){
+    System.out.println(a.add(3,number));
+}
+
+printAddTo3((a, b) -> a + b, 21);
+```
+
+>24
+
+We did not specify the type of our lambda expression since it is implicitely clear when the method printAddTo3 requires a lambda expression of type lambdaAdder. Also note that we can write one-line lambdas that do not require to specify the return value nor requires the curly brackets "{}". 
+
+We do not have to define such interfaces every time we use lambdas since Java comes with many pre-created interfaces out of the box. You can find a collection of such interfaces [here](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html). Some of the most important / most used ones are:
+- Predicate<T>: Takes an input of type T and has a method called "test" which returns True or False. The Type of T is defined at creation.
+- Consumer<T>: Takes an input of type T and has no return value. Only function is "accept()". 
+- Function<T, R>: Takes an input of type T and returns an output of type R. 
+
 
 License
 ----
