@@ -763,6 +763,86 @@ INSERT INTO UNIVERSITY (NAME, NUMBEROFSTUDENTS, SEMESTERCOSTS) VALUES
 
 After starting our application, we can directly post new Users that belong to one of the universities we have preconfigured in our database via the **data.sql** file.
 
+# Using Asynchronous Calls for long lasting requests
+
+In the case where the lookup of the data or the computation of results can take a extensive amount of time it can make sense to use asynchronous methods to deal with the requests. As an example we are faking a long lasting request which takes 5 seconds to be executed. Therefore we extend the UserentityService with a second method getUsersAsync.
+
+```java
+    @Autowired
+    @Async
+    public CompletableFuture<List<UserEntity>> getUsersAsync() throws InterruptedException {
+        List<UserEntity> users = new ArrayList<>();
+        userRepository.findAll().forEach(users::add);
+        Thread.sleep(5000L);
+        return CompletableFuture.completedFuture(users);
+    }
+```
+The base structure of the method is the same. However notice the @Async annotation before method definition. Also notice that the return type is of the type **CompletableFuture<T>** and the return statement uses **CompletableFuture.completedFuture(T)**
+The Thread.sleep statement is just for demonstrating purpose to fake a long lasting computation or so. The sleep-statement is also the reason we need include the **throws InterruptedException**
+To use the **CompletableFuture** type you will need to import it first. An important thing to keep in mind is that the method has to be public to be used as a async-method.
+
+```java
+import java.util.concurrent.CompletableFuture;
+```
+
+To now use the new method we create a different Controller called **UserentityAsyncController** 
+
+```java
+package com.example.demo.Controllers;
+
+import com.example.demo.Entities.UserEntity;
+import com.example.demo.Services.UserentityService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+@RestController
+public class UserentityAsyncController {
+    private final String CONTEXT = "/api/v1/Userentityasync";
+
+    @Autowired
+    private UserentityService userentityService;
+
+    @GetMapping(value = CONTEXT)
+    @ResponseStatus(HttpStatus.OK)
+    public CompletableFuture<List<UserEntity>> getUsersAsync() throws InterruptedException {
+        return userentityService.getUsersAsync();
+    }
+
+}
+```
+This is an exact copy of the **UserentityController** class. But obviously the return type and the method-name of the called Service-method has to be adjusted. For Context we use **Userentityasync**.
+Notice that you have to import the CompletableFuture here as well.
+
+No we are almost done with our async method. We just have to Enable the async methods in our application.
+For that go to the **DemoApplication** class and add the annotation **@EnableAsync**
+
+```java
+@EnableAsync
+public class DemoApplication {
+    [...]
+}
+```
+
+Now you can test it out for yourself. Go to [http://localhost:8080/api/v1/Userentityasync](http://localhost:8080/api/v1/Userentityasync). You will notice that it takes some time (5sec) until you get the response. You can also use the devlopment tool of your browser to inspect how long it takes.  
+  
+If you are skeptical and say: Well it's just a request that takes 5 sec to respond, that's not asynchronous. Well you are right. with just one call it is not notizable. 
+To see the difference go to the UserentityAsyncController and modify the getUsersAsync method to look like this.
+
+```java
+    public CompletableFuture<List<UserEntity>> getUsersAsync() throws InterruptedException {
+        userentityService.getUsersAsync();
+        userentityService.getUsersAsync();
+        return userentityService.getUsersAsync();
+    }
+``` 
+You see that we now call the method that takes 5 seconds 3 times.
+If you now run the application again and visit [http://localhost:8080/api/v1/Userentityasync](http://localhost:8080/api/v1/Userentityasync)  
+You will see it still only takes 5 seconds to get the response. Not evidence enought? Well ok then go to the **UserentityService** and comment out the @Async annotation, rerun he Application and visit the previous link again.
+
 License
 ----
 

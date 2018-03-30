@@ -1,31 +1,27 @@
 package com.example.demo.Controllers;
 
-import com.example.demo.Entities.UniversityEntity;
 import com.example.demo.Entities.UserEntity;
 import com.example.demo.Services.UserentityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import java.util.concurrent.CompletableFuture;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
-public class UserentityController {
-    private final String CONTEXT = "/api/v1/Userentity";
+public class UserentityAsyncController {
+    private final String CONTEXT = "/api/v1/Userentityasync";
 
     @Autowired
     private UserentityService userentityService;
 
     @GetMapping(value = CONTEXT)
     @ResponseStatus(HttpStatus.OK)
-    public List<UserEntity> getUsers() {
-        return userentityService.getUsers();
+    public CompletableFuture<List<UserEntity>> getUsersAsync() throws InterruptedException {
+        userentityService.getUsersAsync();
+        userentityService.getUsersAsync();
+        return userentityService.getUsersAsync();
     }
 
-    @PostMapping(value = CONTEXT)
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createUser(@RequestBody UserEntity user){
-        userentityService.addUser(user);
-    }
 }
