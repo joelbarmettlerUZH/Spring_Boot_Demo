@@ -593,6 +593,46 @@ public class UserEntity {
 ```
 Note that we marked the university field as a foreign key of type **@ManyToOne**, meaning many UserEntities can have a relationship to one university. Such relationships can also be of type **@OneToOne**, **@OneToMany** or of type **@ManyToMany**.
 
+When there is a relationship between two entities, it's not certain that both objects know about each other. In our case, the User knows about the University, but the University does not know about the users. We therefore have an unidirectional relationship. There are also bidirectional relationships, where both parties know about each others existance. 
+
+- **OneToOne**: Objects of type a A have exactly one object of type B. Vice versa, objects of type B have exactly one object of type A as well. A has therefore a OneToOne-Relation to B, B has a OneToOne-Relation to A as well. 
+- **OneToMany**: Objects of tyle A can have multiple objects of type B (<List>). Vice versa, objects of type B can only have one object of Type A. A has therefore a OneToMany-Relation to B, but B has a ManyToOne-Relation to B. 
+- **ManyToOne**: Pendant to OneToMany-Relation: Many objects of type A can be part of an object of type B. A therefore has a ManyToOne-Relation with B, B has a OneToMany-Relation with object A. 
+- **ManyToMany**: Many objects of type A have many objects of type B and vice versa. 
+
+Let's make a quick example of bidirectional relationships. This code is not included into the project since it is only a demonstration. 
+
+```java
+@Entity
+public class UserEntity {
+    [...]
+    @ManyToOne
+    @JoinColumn(name="NAME")
+    private UniversityEntity university;
+    [...]
+}
+
+@Entity
+@Table(name = "UNIVERSITY")
+public class UniversityEntity {
+    @Id
+    @Column(name = "NAME")
+    private String name;
+    [...]
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "university")
+    private List<UserEntity> users;
+    [...]
+}
+```
+
+There are a few things going on here that need exlenation. First, we define the **MappedBy** attribute in the OneToMany-Relationship of the University table. The value "university" is the ForeignKey in the User-Entity that points to the University entity. The entity with the *MappedBy*-attribute does not own the relationship but has the other entity "inside". It's like here we have an university with literally users as entities in the attribute.
+
+**CascadeType.ALL** indicates that a change in our university list of users will affect the user entities as well: When changing the name of a user in the university users list, it will be changed in the user entity as well. Since we really contain the users inside the university, we can do that easily. 
+
+Then, we have declared the side of our bidirectional relationship that is responsible for our relationship via the **@JoinColumn**-annotation - he is the owner of the relationship and has a foreign key to the other entity. The JoinColumn references to the name of the column that contains (usually) the primary key key of the other entity. This states that when we set the university in a user entity, we only have to provide a correct "NAME" for the university in order to create the relationship. The other attributes can be missing or wrong - they will be ignored. The user does not "have" an university, he jsut sits inside of one and has a reference (foreign key to the universities primary key). 
+
+So how would this affect us? Well, when creating a user, we only have to provide a reference to the primary key of a university. When creating a university, we have to pass in the users as entities that joined the university. We can also see the difference when creating the JSON reperesentation for a university or a user: The user does only contain the name of the university he belongs to, while the university contains a list of users with all their attributes inside. 
+
 ## Repository for accessing Entity Relations
 How would we now define a method in our UserentityRepository what would get us all the users of a certain university? Well, our schema **findByattribute(argument)** would no longer hold since we do not want to provide an instance of *university* of which we want to find the users - but instead want to provide the ID of the university as a long. Well, all we need to do is to extend our method naming scheme a bit:
 **findByEntityAttribute(argument)**. In this manner, a new Repository method to get all students that are matriculated on an university with a certain ID would look as follows:
@@ -663,7 +703,7 @@ Note that we only have to include the primary key *(here, the name)* of an alrea
 
 Nice! We have created a new User entity which has a university as an attribute.
 
-# Preloading a database from a **data-h2.sql**-File
+# Preloading a database from a **data.sql**-File
 What we want to do now is write an SQL-Script that inserts initial values for us inside a database entity. First, we need to prepare our UniversityEntity class such that we can access the attributes via SQL statements:
 
 ```java
