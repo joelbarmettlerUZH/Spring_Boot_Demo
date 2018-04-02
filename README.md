@@ -977,6 +977,93 @@ We do not have to define such interfaces every time we use lambdas since Java co
 - Consumer<T>: Takes an input of type T and has no return value. Only function is "accept()". 
 - Function<T, R>: Takes an input of type T and returns an output of type R. 
 
+# Testing of RESTControllers
+
+To test the REST Controllers we first have to include some testing frameworks to our build.gradle.
+We use Mockito, JUnit and MockMvc. JUnit is used as general Testing framework, Mockito will mock the Service and MockMVC launches the Controller.
+
+```
+repositories {
+	jcenter()
+}
+
+
+dependencies {
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile("org.mockito:mockito-core:1.+")
+	testCompile('junit:junit:4.12')
+}
+```
+
+Now lets create a Test for the UserController. It is important to annotate that we want to use the **MockitoJUnitRunner** to run the test.
+
+```java
+@RunWith(MockitoJUnitRunner.class)
+public class UserControllerTest {
+    [...]
+}
+```
+
+Now we have to create a Mock-Service **mockUserService** using the **@Mock** annotation and link it to a Controller **userController** with the **@InjectMocks** annotation
+
+
+```java
+    @Mock
+    UserService mockUserService;
+    @InjectMocks
+    UserController userController = new UserController();
+```
+
+Next up we build the MockMvc. This we do in the Setup-part of the test and annotate it with **@Before**
+
+```java
+    @Before
+    public void setup(){
+        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+    }
+```
+
+Now we can write the test for the different methods. As usual we annotate the test with **@Test**
+
+```java
+    @Test
+    public void getUsers() throws Exception {
+
+        userController.getUsers();
+
+        mockMvc.perform(get("/api/v1/User")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("[]"));
+                verify(mockUserService, times(2)).getUsers();
+    }
+```
+In the perform() statement we first specify the request-type, here **get()** with the according Context-Url.
+Next up in **.accept()** we specify the type of media the request accepts. Since in the Example it is a GET-request is does not makes sense to specify accepting statements. It is included as en example how to do it in case of other requests like POST.
+The **.andExpect** statements specify what we expect. Here we can differentiate between status and content. Where we have "[]" you can specify the exact String of what you expect to be returned.
+MockMvc comes with many more things that can be checked and verified. You can find a list functionalities[here.](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/test/web/servlet/result/MockMvcResultMatchers.html) 
+
+Finally with verify() we check how often the method is called, just enter the expected NUmber of wanted Invocations as an Int in times(). 
+Also Note that the tested method might throw Exceptions.
+
+Obviously you'll need to import the needed mockito, MockMvc and Junit classes. Here a list of things to be imported for the Example.
+```java
+import com.example.demo.Services.UserService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+```
+
+
 
 License
 ----
